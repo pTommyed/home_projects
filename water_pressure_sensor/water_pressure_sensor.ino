@@ -14,8 +14,20 @@
 #include <stdint.h> //due to wdt
 #include <avr/wdt.h> // wdt lib
 
+#include "Wire.h"
+#define DS3231_I2C_ADDRESS 0x68
 
 /*----------------------- DEFINITION -----------------------------------*/
+String date = "";
+byte Sec, Min, Hour, DayWeek, DayMonth, Month, Year;
+
+byte decToBcd(byte val){
+    return( (val/10*16) + (val%10) );
+}
+// Convert binary coded decimal to normal decimal numbers
+byte bcdToDec(byte val){
+    return( (val/16*10) + (val%16) );
+}
 
 const byte pressure_pin = A0;
 
@@ -37,6 +49,7 @@ static int timer0_1s_count = 977;
 
 void setup() {
   analogReference(DEFAULT);
+  Wire.begin();
   serial_initial();
   pins_initial();
   bootup_led_indication();

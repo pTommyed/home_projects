@@ -6,7 +6,7 @@ void serial_initial() {
   }
 }
 
-/*--------------------------timer0-initialization------------------------------------------*/
+/*--------------------------timer1-initialization------------------------------------------*/
 void timer0_initial() {
   cli();  // disable all interrupts
 
@@ -69,11 +69,61 @@ void pressure_calculate() {
 void measure_flag_check() {
   if (measure_flag == 1) {
     measure_flag = 0;
+    
+     // retrieve data from DS323   
+    readDS3231time(&Sec, &Min, &Hour, &DayWeek, &DayMonth, &Month, &Year);
+    time_date_processing(); 
+
     voltage_measure();
     pressure_calculate();
     led_measure_indicator_set();
     serial_print_pressure();
   }
+}
+
+/*------------------------------- read_time_from_RTC --------------------------------------------*/
+void readDS3231time(byte *second, byte *minute, byte *hour, byte *dayOfWeek, byte *dayOfMonth, byte *month, byte *year){
+    Wire.beginTransmission(DS3231_I2C_ADDRESS);
+    Wire.write(0); // set DS3231 register pointer to 00h
+    Wire.endTransmission();
+    Wire.requestFrom(DS3231_I2C_ADDRESS, 7);
+    // request seven bytes of data from DS3231 starting from register 00h
+    *second = bcdToDec(Wire.read() & 0x7f);
+    *minute = bcdToDec(Wire.read());
+    *hour = bcdToDec(Wire.read() & 0x3f);
+    *dayOfWeek = bcdToDec(Wire.read());
+    *dayOfMonth = bcdToDec(Wire.read());
+    *month = bcdToDec(Wire.read());
+    *year = bcdToDec(Wire.read());
+}
+
+/*---------------------------- time_date_processing --------------------------------------------------------------*/
+void time_date_processing(){
+  date = "";
+  
+  if (Hour<10){
+      date = date + "0";
+  }
+  date = date + String(Hour);
+  date = date + ":";
+  if (Min<10){
+      date = date + "0";
+  }
+  date = date + String(Min);
+  date = date + ":";
+  if (Sec<10){
+      date = date + "0";
+  }
+  date = date + String(Sec);
+  date = date + " ";
+  date = date + String(DayMonth);
+  date = date + "-";
+  date = date + String(Month);
+  date = date + "-";
+  date = date + String(Year);
+  date = date + " - ";
+
+  Serial.print(date);
 }
 
 /*----------------------serial-print_pressure------------------------------------*/
