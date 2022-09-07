@@ -14,10 +14,16 @@
 #include <stdint.h> //due to wdt
 #include <avr/wdt.h> // wdt lib
 
+#include <SPI.h> // lib for SPI 
+#include <SD.h> // lib for SD modul
+
 #include "Wire.h"
 #define DS3231_I2C_ADDRESS 0x68
 
 /*----------------------- DEFINITION -----------------------------------*/
+File Soubor; // variable for SD card
+String file_name = "";
+
 String date = "";
 byte Sec, Min, Hour, DayWeek, DayMonth, Month, Year;
 
@@ -51,6 +57,8 @@ void setup() {
   analogReference(DEFAULT);
   Wire.begin();
   serial_initial();
+  sd_card_initial();
+  file_name_creation();
   pins_initial();
   bootup_led_indication();
   timer0_initial();

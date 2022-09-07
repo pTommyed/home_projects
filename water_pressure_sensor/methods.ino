@@ -6,6 +6,22 @@ void serial_initial() {
   }
 }
 
+/*------------------------------ sd_card_initial ------------------------------------*/
+void sd_card_initial() {
+  // inicializace SD Modulu
+  while (!SD.begin(cs_pin)) { 
+    delay(2000);
+  }
+  
+  while (!SD.exists("file_name.txt")) {
+    Soubor = SD.open("file_name.txt", FILE_WRITE); 
+    Soubor.print("file_initialized \r\n");
+    delay(1000);
+  }
+
+  Soubor.close(); 
+}
+
 /*--------------------------timer1-initialization------------------------------------------*/
 void timer0_initial() {
   cli();  // disable all interrupts
@@ -28,6 +44,7 @@ ISR(TIMER0_COMPA_vect) {
 
 /*----------------------pins-initialization------------------------------------*/
 void pins_initial() {
+  pinMode(cs_pin, OUTPUT);
   pinMode(led_on_indication, OUTPUT);
   pinMode(led_measure_indication, OUTPUT);
 }
@@ -76,8 +93,9 @@ void measure_flag_check() {
 
     voltage_measure();
     pressure_calculate();
+    write_to_SD();
     led_measure_indicator_set();
-    serial_print_pressure();
+    //serial_print_pressure();
   }
 }
 
@@ -126,6 +144,31 @@ void time_date_processing(){
   Serial.print(date);
 }
 
+/*---------------------------- file_name_creation --------------------------------------------------------------*/
+void file_name_creation(){
+  readDS3231time(&Sec, &Min, &Hour, &DayWeek, &DayMonth, &Month, &Year);
+
+  if (Hour<10){
+      file_name = file_name + "0";
+  }
+  file_name = file_name + String(Hour);
+  if (Min<10){
+      file_name = file_name + "0";
+  }
+  file_name = file_name + String(Min);
+  if (Sec<10){
+      file_name = file_name + "0";
+  }
+  file_name = file_name + String(Sec);
+  file_name = file_name + String(DayMonth);
+  file_name = file_name + String(Month);
+  file_name = file_name + String(Year);
+
+  file_name = file_name + "_data.txt";
+
+  Serial.println(file_name);
+}
+
 /*----------------------serial-print_pressure------------------------------------*/
 void serial_print_pressure() {
   Serial.print("pressure = ");
@@ -146,4 +189,16 @@ void led_measure_indicator_set() {
     digitalWrite(led_measure_indication, LOW);
     led_measure_indication_flag = 0;
   }
+}
+
+/*------------------------ write_to_SD ---------------------------------------*/
+void write_to_SD(){
+  String message = "";
+
+  Soubor = SD.open("file_name.txt", FILE_WRITE); 
+  message = date + String(pressure) + "," + String(voltage) + ";" + "\r\n";
+  Soubor.print(message);
+  Serial.print(message);
+
+  Soubor.close();
 }
