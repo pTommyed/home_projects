@@ -17,7 +17,7 @@
 #include <SPI.h> // lib for SPI 
 #include <SD.h> // lib for SD modul
 
-#include "Wire.h"
+#include <Wire.h>
 #define DS3231_I2C_ADDRESS 0x68
 
 /*----------------------- DEFINITION -----------------------------------*/
@@ -55,11 +55,11 @@ static int timer0_1s_count = 977;
 
 void setup() {
   analogReference(DEFAULT);
+  pins_initial();
   Wire.begin();
   serial_initial();
-  sd_card_initial();
   file_name_creation();
-  pins_initial();
+  sd_card_initial();
   bootup_led_indication();
   timer0_initial();
   wdt_enable(WDTO_2S);  //wdt reset_15MS; 30MS; 60ms; 120MS; 250MS; 500MS; 1S; 2S; 4S; 8S

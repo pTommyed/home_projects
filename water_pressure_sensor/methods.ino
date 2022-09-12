@@ -12,14 +12,13 @@ void sd_card_initial() {
   while (!SD.begin(cs_pin)) { 
     delay(2000);
   }
-  
-  while (!SD.exists("file_name.txt")) {
-    Soubor = SD.open("file_name.txt", FILE_WRITE); 
-    Soubor.print("file_initialized \r\n");
-    delay(1000);
-  }
 
-  Soubor.close(); 
+  Soubor = SD.open(file_name , FILE_WRITE);
+
+  if (Soubor) {
+    Soubor.print("---------------------- file_initialized _ " + file_name + " ----------------------" + "\r\n");
+    Soubor.close();
+  } 
 }
 
 /*--------------------------timer1-initialization------------------------------------------*/
@@ -160,11 +159,11 @@ void file_name_creation(){
       file_name = file_name + "0";
   }
   file_name = file_name + String(Sec);
-  file_name = file_name + String(DayMonth);
-  file_name = file_name + String(Month);
-  file_name = file_name + String(Year);
+  //file_name = file_name + String(DayMonth);
+  //file_name = file_name + String(Month);
+  //file_name = file_name + String(Year);
 
-  file_name = file_name + "_data.txt";
+  file_name = file_name + ".txt";
 
   Serial.println(file_name);
 }
@@ -195,10 +194,13 @@ void led_measure_indicator_set() {
 void write_to_SD(){
   String message = "";
 
-  Soubor = SD.open("file_name.txt", FILE_WRITE); 
   message = date + String(pressure) + "," + String(voltage) + ";" + "\r\n";
-  Soubor.print(message);
-  Serial.print(message);
-
-  Soubor.close();
+  
+  Soubor = SD.open(file_name, FILE_WRITE); 
+  
+  if (Soubor) {
+    Soubor.print(message);
+    Serial.print(message);
+    Soubor.close();
+  }
 }
