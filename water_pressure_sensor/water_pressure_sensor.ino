@@ -50,7 +50,7 @@ float pressure = 0.0;  // pressure [MPa]
 static float vcc = 4.609; // source voltage [V]
 
 int timer0_counter =0;
-static int timer0_1s_count = 977;
+static int timer0_10s_count = 9770; //1s = 977
 
 
 void setup() {

@@ -35,7 +35,7 @@ void timer0_initial() {
 /*--------------------------interupt_function_timer_0----------------*/
 ISR(TIMER0_COMPA_vect) {
   timer0_counter = timer0_counter + 1;
-  if (timer0_counter == timer0_1s_count) {
+  if (timer0_counter == timer0_10s_count) {
     measure_flag = 1;
     timer0_counter = 0;
   }
