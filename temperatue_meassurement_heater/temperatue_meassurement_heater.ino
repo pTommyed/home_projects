@@ -38,6 +38,8 @@ DallasTemperature sensor_2(&oneWire_BUS2);
 const float start_temp_kotel = 30.0;
 const float hysterezia = 2.0;
 float hysterezia_temp = start_temp_kotel - hysterezia;
+const float max_temperature = 73.0;
+float hysterezia_max_temperature = max_temperature + hysterezia;
 
 float temp_boiler = 0.0;
 float temp_kotel = 0.0;

@@ -134,11 +134,11 @@ void control_outputs() {
     
     float hysterezia_temporary = temp_boiler + hysterezia;  
     
-    if (temp_kotel > temp_boiler) {
+    if ((temp_kotel > temp_boiler) && (temp_boiler <= max_temperature)){
       relay_1_boiler_flag = 1;
       digitalWrite(relay_1_boiler_pin, HIGH);
       delay(100);
-    } else if (temp_kotel <= hysterezia_temporary) {
+    } else if ((temp_kotel <= hysterezia_temporary) || (temp_boiler >= hysterezia_max_temperature)){
         relay_1_boiler_flag = 0;
         digitalWrite(relay_1_boiler_pin, LOW);
         delay(100);
