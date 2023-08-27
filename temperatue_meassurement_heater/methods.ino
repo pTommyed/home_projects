@@ -107,8 +107,8 @@ void measure_temperatures() {
   sensors_get_temp();
 }
 
-/*-------------------------- control_outputs  -------------------------*/
-void control_outputs() {
+/*-------------------------- error_detection  -------------------------*/
+void error_detection() {
   if (temp_boiler == -127) {
     temp_boiler_error_flag = 1;
   } else {
@@ -120,50 +120,58 @@ void control_outputs() {
   } else {
     temp_kotel_error_flag = 0;
   }
+}
+
+/*-------------------------- control_boiler_output  -------------------------*/
+void control_boiler_output() {
+  
+  float hysterezia_temporary = temp_boiler + hysterezia;  // computing of actual hysterezia value for boiler output setting
 
   if ((temp_boiler_error_flag == 0) && (temp_kotel_error_flag == 0)) {
+    if (temp_kotel >= start_temp_kotel) { 
+      if ((temp_kotel > temp_boiler) && (temp_boiler <= max_temperature)){
+        relay_1_boiler_flag = 1;
+        digitalWrite(relay_1_boiler_pin, HIGH);
+        delay(100);
+
+      } else if ((temp_kotel <= hysterezia_temporary) || (temp_boiler >= hysterezia_max_temperature)){
+          relay_1_boiler_flag = 0;
+          digitalWrite(relay_1_boiler_pin, LOW);
+          delay(100);
+          }
+
+    } else if (temp_kotel <= hysterezia_temporary) {
+          relay_1_boiler_flag = 0;
+          digitalWrite(relay_1_boiler_pin, LOW);
+          delay(100);
+          }  
+      
+  } else if (relay_1_boiler_flag == 1){
+      relay_1_boiler_flag = 0;
+      digitalWrite(relay_1_boiler_pin, LOW);
+      delay(100);
+      }
+
+}
+
+/*-------------------------- control_kotel_output  -------------------------*/
+void control_kotel_output() {
+
+  if (temp_kotel_error_flag == 0) {
     if (temp_kotel >= start_temp_kotel) {
       relay_2_kotel_flag = 1;
       digitalWrite(relay_2_kotel_pin, HIGH);
-      delay(100);
+      delay(100); 
+      
     } else if (temp_kotel <= hysterezia_temp ) {
         relay_2_kotel_flag = 0;
         digitalWrite(relay_2_kotel_pin, LOW);
         delay(100);
+        }  
+      
+  } else if (relay_2_kotel_flag == 1){
+      // let output turn on!
       }
-    
-    float hysterezia_temporary = temp_boiler + hysterezia;  
-    
-    if ((temp_kotel > temp_boiler) && (temp_boiler <= max_temperature)){
-      relay_1_boiler_flag = 1;
-      digitalWrite(relay_1_boiler_pin, HIGH);
-      delay(100);
-    } else if ((temp_kotel <= hysterezia_temporary) || (temp_boiler >= hysterezia_max_temperature)){
-        relay_1_boiler_flag = 0;
-        digitalWrite(relay_1_boiler_pin, LOW);
-        delay(100);
-      }    
-  } else if (((temp_boiler_error_flag == 1) || (temp_kotel_error_flag == 1)) && (relay_1_boiler_flag == 1)){
-        relay_1_boiler_flag = 0;
-        digitalWrite(relay_1_boiler_pin, LOW);
-        delay(100);
-    }
-
-}
-
-
-/*-------------------------- measure_flag_status_check  -------------------------*/
-void measure_flag_check() {
-  if (measure_flag == 1) {
-    measure_flag = 0;
-
-    measure_temperatures();
-    control_outputs();
-    lcd_print();
-    serial_print_temp();
-    
-    led_measure_indicator_set();
-  }
 }
 
 /*-----------------------Serial-print-water-temperature--------------------------------*/
