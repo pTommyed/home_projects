@@ -76,6 +76,19 @@ void setup() {
 }
 
 void loop() {
-  measure_flag_check ();
+
+  if (measure_flag == 1) {
+    measure_flag = 0;
+
+    measure_temperatures();
+    error_detection();
+    control_boiler_output();
+    control_kotel_output();
+    lcd_print();
+    serial_print_temp();
+    
+    led_measure_indicator_set();
+  }
+
   wdt_reset (); // Reset watchdog counter
 }
