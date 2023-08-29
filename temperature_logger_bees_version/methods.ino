@@ -107,8 +107,12 @@ void serial_output() {
         Serial.println(message);
       }
     }
-    Serial.println("---------------------------------------------------------------");
-  }       
+  }
+  message = "battery voltage: " + String(voltage_battery) + "V"; 
+  Serial.println(message);
+  Serial.println("---------------------------------------------------------------"); 
+
+  delay(200);      
 }
 
 /*------------------------ write_to_SD ---------------------------------------*/
@@ -135,7 +139,8 @@ void write_to_sd() {
         }
       }
     }
-  soubor.print("\r\n");
+  message = String(voltage_battery) + ";"; 
+  soubor.println(message);
   soubor.close();
 } 
 
@@ -174,4 +179,49 @@ void sensors_get_temp() {
   temperature[0]=sensor_1.getTempCByIndex(0);
   temperature[1]=sensor_2.getTempCByIndex(0);
   temperature[2]=sensor_3.getTempCByIndex(0);
+}
+
+/*----------------------voltage_measure------------------------------------*/
+void voltage_measure() {
+  int voltage_temp = 0;
+
+  for (int temp =0;temp < measure_count; temp++) {
+    voltage_temp = voltage_temp + analogRead(voltage_battery_pin);
+  }
+
+  voltage_divided = voltage_temp / measure_count;
+  voltage_divided = voltage_divided * (5.0 / 1023.0);
+
+  voltage_battery = voltage_divided / (res_2 / res);
+}
+
+/*------------------------sleep_mode_to_8_sec_init -----------------------------------------*/
+
+void sleep_mode_8s_init () {
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  //set sleep mode
+
+  MCUSR &= ~(1 << WDRF);                           // reset watch dog
+  WDTCSR |= (1 << WDCE) | (1 << WDE);              // eneable watch dog setting
+  WDTCSR = (1 << WDP0) | (1 << WDP3) ;             // set watch dog to 8 s
+  WDTCSR |= (1 << WDIE);                           // enale interrupt mode
+}
+
+/*------------------------run _leep_mode_to_8_sec -----------------------------------------*/
+
+void run_sleep_8s () {
+  sleep_enable(); // enable sleep
+  sleep_mode();  // start sleep
+  sleep_disable();  // probuzení
+}
+
+/*-------------------------- wake_up_from_Watchdog ----------------*/
+
+ISR( WDT_vect ) {
+  measure_flag = 1;
+}
+
+/*-------------------------- measure_temperatures  -------------------------*/
+void measure_temperatures() {
+  sensors_request();
+  sensors_get_temp();
 }
