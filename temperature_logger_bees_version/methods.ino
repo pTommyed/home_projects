@@ -42,8 +42,8 @@ void sd_card_initial() {
     Serial.println("soubor DATA.txt detected");
     } else {
         soubor = SD.open(file_name , FILE_WRITE);
-        soubor.println("---------------------------------------------------------------");
-        soubor.println("---------------------------------------------------------------");
+        soubor.println("-----------------------------");
+        soubor.println("-----------------------------");
         while (!soubor){
           Serial.println("error_SD_card!");
           digitalWrite(led_indication, HIGH);
@@ -56,14 +56,14 @@ void sd_card_initial() {
         for(int i=0;i<3;i++){
           int number = i + 1;
           if (temp_control[i] == 1) {
-            message = "        temp_" + String(number) + ": init OK;" ;
+            message = "temp_" + String(number) + ": init OK;" ;
             } else {
-                message = "        temp_" + String(number) + ": no conected!;" ;
+                message = "temp_" + String(number) + ": no conected!;" ;
               }
             soubor.println(message);
             }
-        soubor.println("---------------------------------------------------------------");
-        soubor.println("---------------------------------------------------------------");
+        soubor.println("-----------------------------");
+        soubor.println("-----------------------------");
         soubor.close();
         }        
 }
@@ -72,28 +72,28 @@ void sd_card_initial() {
 void serial_initial_output() {
   String message = "";
 
-  Serial.println("---------------------------------------------------------------");
-  Serial.println("---------------------------------------------------------------");
+  Serial.println("-----------------------------");
+  Serial.println("-----------------------------");
 
   for(int i=0;i<3;i++) {
     int number = i + 1;
     if (temp_control[i] == 1) {
-      message = "        temp_" + String(number) + ": init OK" ;
+      message = "temp_" + String(number) + ": init OK" ;
     } else {
-        message = "        temp_" + String(number) + ": no conected!" ;
+        message = "temp_" + String(number) + ": no conected!" ;
       }
     Serial.println(message);
   }
 
-  Serial.println("---------------------------------------------------------------");
-  Serial.println("---------------------------------------------------------------");       
+  Serial.println("-----------------------------");
+  Serial.println("-----------------------------");       
 }
 
 /*------------------------------ serial_output ------------------------------------*/
 void serial_output() {
   String message = "";
 
-  Serial.println("---------------------------------------------------------------");
+  Serial.println("-----------------------------");
 
   for(int i=0;i<3;i++) {
     if (temp_control[i] == 1) {
@@ -108,9 +108,9 @@ void serial_output() {
       }
     }
   }
-  message = "battery voltage: " + String(voltage_battery) + "V"; 
+  message = "battery voltage: " + String(voltage_battery) + " V"; 
   Serial.println(message);
-  Serial.println("---------------------------------------------------------------"); 
+  Serial.println("-----------------------------"); 
 
   delay(200);      
 }
