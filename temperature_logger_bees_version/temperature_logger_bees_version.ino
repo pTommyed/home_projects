@@ -5,7 +5,7 @@
 //####################################################
 
 
-// DESCRTIPTION: -   sampling frequency 10 s
+// DESCRTIPTION: -   sampling frequency 8 s
 //               -   watchdog used
 
 // HW: Aruino nano, temperatrue sensor DS18B20, micros SD card module
