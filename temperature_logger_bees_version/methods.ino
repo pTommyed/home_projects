@@ -206,6 +206,16 @@ void sleep_mode_8s_init () {
   WDTCSR |= (1 << WDIE);                           // enale interrupt mode
 }
 
+/*-----------------------tpl_110_reset--------------------------------*/
+void tpl_110_reset() {
+  for (int i=0; i<2; i++) {
+    digitalWrite(tpl110_reset_pin, HIGH);
+    delay(50);
+    digitalWrite(tpl110_reset_pin, LOW);
+    delay(50);
+  } 
+}
+
 /*------------------------run _leep_mode_to_8_sec -----------------------------------------*/
 
 void run_sleep_8s () {

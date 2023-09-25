@@ -5,10 +5,10 @@
 //####################################################
 
 
-// DESCRTIPTION: -   sampling frequency 1 Hz
-//               -   timer 0 -- sampling freq
+// DESCRTIPTION: -   sampling frequency 8 s
+//               -   watchdog used
 
-// HW: Aruino nano, temperatrue sensor DS18B20, 2 micros SD card module
+// HW: Aruino nano, temperatrue sensor DS18B20, micros SD card module
 
 /*----------------------- DEPENDENCES ----------------------------------*/
 #include <avr/sleep.h>      // library for sleep
@@ -37,6 +37,7 @@ DallasTemperature sensor_2(&oneWire_BUS2);
 DallasTemperature sensor_3(&oneWire_BUS3);
 
 const byte led_indication = 7;
+const byte tpl110_reset_pin = 8;
 const byte cs_pin = 10;
 const byte voltage_battery_pin = A0;
 
@@ -75,6 +76,7 @@ void loop() {
     voltage_measure();
     write_to_sd();
     serial_output();
+    tpl_110_reset();
     run_sleep_8s();
   }
 }
