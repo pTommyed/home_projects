@@ -10,9 +10,12 @@ void serial_initial() {
 void pins_initial() {
   pinMode(cs_pin, OUTPUT);
   pinMode(led_indication, OUTPUT);
+  pinMode(tpl110_reset_pin, OUTPUT);
 
   digitalWrite(led_indication, LOW);
+  digitalWrite(tpl110_reset_pin, LOW);
   delay(100);
+  
 }
 
 /*----------------------bootup_led_indication------------------------------------*/
@@ -165,6 +168,12 @@ void sensors_initial() {
       temp_control[i] = 1;
     }
   }
+}
+
+
+/*-----------------------tpl_110_reset--------------------------------*/
+void tpl_110_reset() {
+  digitalWrite(tpl110_reset_pin, HIGH);
 }
 
 /*-----------------------Sensors-requesting-temperature--------------------------------*/

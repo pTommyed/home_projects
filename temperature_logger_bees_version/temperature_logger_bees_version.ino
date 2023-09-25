@@ -37,6 +37,7 @@ DallasTemperature sensor_2(&oneWire_BUS2);
 DallasTemperature sensor_3(&oneWire_BUS3);
 
 const byte led_indication = 7;
+const byte tpl110_reset_pin = 8;
 const byte cs_pin = 10;
 const byte voltage_battery_pin = A0;
 
@@ -75,6 +76,7 @@ void loop() {
     voltage_measure();
     write_to_sd();
     serial_output();
+    tpl_110_reset();
     run_sleep_8s();
   }
 }
