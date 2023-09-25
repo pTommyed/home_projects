@@ -6,13 +6,15 @@
 
 
 // DESCRTIPTION: -   sampling frequency 10 s
-//               -   timer 0 used
+//               -   watchdog used
 
 // HW: Aruino nano, temperatrue sensor DS18B20, micros SD card module
 
 /*----------------------- DEPENDENCES ----------------------------------*/
-#include <stdint.h> //due to wdt
-#include <avr/wdt.h> // library for default watchdog functions
+#include <avr/sleep.h>      // library for sleep
+#include <avr/power.h>      // library for power control
+#include <avr/wdt.h>        // library for default watchdog functions
+#include <avr/interrupt.h>  // library for interrupts handling
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -41,9 +43,6 @@ const byte voltage_battery_pin = A0;
 
 bool measure_flag = 1;
 
-int timer0_counter = 0;
-static int timer0_10s_count = 9770; //1s = 977
-
 float temperature[3] = {100.0,100.0,100.0}; // temperature of water in °C
 bool temp_control[3] = {0,0,0}; // indicitation of plug in sensors
 
@@ -66,8 +65,7 @@ void setup() {
   sensors_initial();
   serial_initial_output();
   sd_card_initial();
-  timer0_initial();
-  wdt_enable(WDTO_2S);  //wdt reset_15MS; 30MS; 60ms; 120MS; 250MS; 500MS; 1S; 2S; 4S; 8S
+  sleep_mode_8s_init();
   bootup_led_indication();
 }
 
@@ -79,6 +77,6 @@ void loop() {
     write_to_sd();
     serial_output();
     tpl_110_reset();
+    run_sleep_8s();
   }
-  wdt_reset (); // Reset watchdog counter
 }

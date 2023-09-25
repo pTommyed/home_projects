@@ -10,12 +10,9 @@ void serial_initial() {
 void pins_initial() {
   pinMode(cs_pin, OUTPUT);
   pinMode(led_indication, OUTPUT);
-  pinMode(tpl110_reset_pin, OUTPUT);
 
   digitalWrite(led_indication, LOW);
-  digitalWrite(tpl110_reset_pin, LOW);
   delay(100);
-  
 }
 
 /*----------------------bootup_led_indication------------------------------------*/
@@ -170,12 +167,6 @@ void sensors_initial() {
   }
 }
 
-
-/*-----------------------tpl_110_reset--------------------------------*/
-void tpl_110_reset() {
-  digitalWrite(tpl110_reset_pin, HIGH);
-}
-
 /*-----------------------Sensors-requesting-temperature--------------------------------*/
 void sensors_request() {
   sensor_1.requestTemperatures();
@@ -204,24 +195,39 @@ void voltage_measure() {
   voltage_battery = voltage_divided / (res_2 / res);
 }
 
-/*--------------------------timer1-initialization------------------------------------------*/
-void timer0_initial() {
-  cli();  // disable all interrupts
+/*------------------------sleep_mode_to_8_sec_init -----------------------------------------*/
 
-  OCR0A = 50;                                         // compareregister 16MHz/64/5kHz = 50 (max 255)
-  TCCR0B |= (1 << CS00) | (1 << CS01) | (0 << CS02);  // 64 prescaler
-  TIMSK0 |= (1 << OCIE0A);                            // enable timer interrupt ( interrupt is active- when is value                           // enable timer interrupt ( interrupt is active- when is value of TCNT0 (value of counter) in match with OCR0A)
+void sleep_mode_8s_init () {
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  //set sleep mode
 
-  sei();  // enable all interrupts
+  MCUSR &= ~(1 << WDRF);                           // reset watch dog
+  WDTCSR |= (1 << WDCE) | (1 << WDE);              // eneable watch dog setting
+  WDTCSR = (1 << WDP0) | (1 << WDP3) ;             // set watch dog to 8 s
+  WDTCSR |= (1 << WDIE);                           // enale interrupt mode
 }
 
-/*--------------------------interupt_function_timer_0----------------*/
-ISR(TIMER0_COMPA_vect) {
-  timer0_counter = timer0_counter + 1;
-  if (timer0_counter == timer0_10s_count) {
-    measure_flag = 1;
-    timer0_counter = 0;
-  }
+/*-----------------------tpl_110_reset--------------------------------*/
+void tpl_110_reset() {
+  for (int i=0; i<2; i++) {
+    digitalWrite(tpl110_reset_pin, HIGH);
+    delay(50);
+    digitalWrite(tpl110_reset_pin, LOW);
+    delay(50);
+  } 
+}
+
+/*------------------------run _leep_mode_to_8_sec -----------------------------------------*/
+
+void run_sleep_8s () {
+  sleep_enable(); // enable sleep
+  sleep_mode();  // start sleep
+  sleep_disable();  // probuzení
+}
+
+/*-------------------------- wake_up_from_Watchdog ----------------*/
+
+ISR( WDT_vect ) {
+  measure_flag = 1;
 }
 
 /*-------------------------- measure_temperatures  -------------------------*/
