@@ -36,6 +36,7 @@ void sd_card_initial() {
     digitalWrite(led_indication, HIGH);
     delay(500);
     digitalWrite(led_indication, LOW);
+    delay(500);
   }
 
   if (SD.exists(file_name)) {
@@ -47,11 +48,10 @@ void sd_card_initial() {
         while (!soubor){
           Serial.println("error_SD_card!");
           digitalWrite(led_indication, HIGH);
-          delay(100);
+          delay(500);
+          digitalWrite(led_indication, LOW);
+          delay(500);
         }
-
-        digitalWrite(led_indication, LOW);
-        delay(100);
 
         for(int i=0;i<3;i++){
           int number = i + 1;
@@ -65,7 +65,9 @@ void sd_card_initial() {
         soubor.println("-----------------------------");
         soubor.println("-----------------------------");
         soubor.close();
-        }        
+        } 
+
+  delay(250);            
 }
 
 /*------------------------------ serial_initial_output ------------------------------------*/
@@ -112,7 +114,7 @@ void serial_output() {
   Serial.println(message);
   Serial.println("-----------------------------"); 
 
-  delay(200);      
+  delay(250);      
 }
 
 /*------------------------ write_to_SD ---------------------------------------*/
@@ -123,11 +125,10 @@ void write_to_sd() {
   while (!soubor){
     Serial.println("error_SD_card!");
     digitalWrite(led_indication, HIGH);
-    delay(100);
+    delay(500);
+    digitalWrite(led_indication, LOW);
+    delay(500);
     }
-
-  digitalWrite(led_indication, LOW);
-  delay(100);
 
   for(int i=0;i<3;i++){
     if (temp_control[i] == 1) {
@@ -142,6 +143,7 @@ void write_to_sd() {
   message = String(voltage_battery) + ";"; 
   soubor.println(message);
   soubor.close();
+  delay(250);
 } 
 
 /*-----------------------Sensors-initialization--------------------------------*/
@@ -210,9 +212,9 @@ void sleep_mode_8s_init () {
 void tpl_110_reset() {
   for (int i=0; i<2; i++) {
     digitalWrite(tpl110_reset_pin, HIGH);
-    delay(50);
+    delay(100);
     digitalWrite(tpl110_reset_pin, LOW);
-    delay(50);
+    delay(100);
   } 
 }
 
