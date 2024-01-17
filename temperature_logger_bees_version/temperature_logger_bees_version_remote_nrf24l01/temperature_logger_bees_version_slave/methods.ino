@@ -1,9 +1,64 @@
 /*----------------------serial-initialization------------------------------------*/
 void serial_initial() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial) {
     ;
   }
+
+  printf_begin();
+}
+
+/*----------------------nrf24l01-initialization------------------------------------*/
+void nrf24l01_initial() {
+  Radio.begin();
+  //Radio.setAddressWidth(5);
+  Radio.openWritingPipe(address_tr);
+  Radio.setChannel(115);  //115 band above WIFI signals
+  Radio.setPALevel(RF24_PA_MAX); //MIN power low rage
+  Radio.setDataRate(RF24_1MBPS) ;  //Minimum speed
+  //Serial.println("Receive Setup Initialized");
+  //Radio.printDetails();
+  Radio.stopListening(); //Stop Receiving and start transminitng
+
+  buf_clear();
+}
+
+/*----------------------transmit_bufer_clean------------------------------------*/
+void buf_clear() {
+ for (int i=0;i<5;i++){
+    buf[i] = 100;
+  }
+}
+
+/*----------------------remote_transmit_data------------------------------------*/
+void remote_transmit_data(){
+  transmit_buf_create();
+
+  Radio.openWritingPipe(address_tr);//Sends data on this 40-bit address 
+  Radio.write(&buf, sizeof(buf));
+  //Serial.print("WriteData");
+  //Serial.print(".........");
+
+  buf_clear();
+}
+
+/*----------------------transmit_buf_create------------------------------------*/
+void transmit_buf_create(){
+  int y = 0;
+  int temporary = 0;
+
+  buf[0] = index_device;
+
+  for(int i=0;i<3;i++){
+    y = y+1;
+    if (temp_control[i] == 1) {
+      temporary = temperature[i] * 100;
+      buf[y] = temporary;
+    }
+  }
+
+  temporary = voltage_battery * 100;
+  buf[4] = temporary;
 }
 
 /*----------------------pins-initialization------------------------------------*/

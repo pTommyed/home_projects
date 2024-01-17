@@ -7,8 +7,10 @@
 
 // DESCRTIPTION: -   sampling frequency 8 s
 //               -   watchdog used
+//               -   remote version
+//               -   slave module
 
-// HW: Aruino nano, temperatrue sensor DS18B20, micros SD card module
+// HW: Aruino nano, temperatrue sensor DS18B20, micros SD card module, nrf24l01
 
 /*----------------------- DEPENDENCES ----------------------------------*/
 #include <avr/sleep.h>      // library for sleep
@@ -19,6 +21,10 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#include<Wire.h>
+#include <RF24.h>
+#include <printf.h>
+
 #include <SPI.h> // lib to SPI sbernici
 #include <SD.h> // lib to SD modul
 
@@ -28,6 +34,8 @@
 #define ONE_WIRE_BUS_2 5
 #define ONE_WIRE_BUS_3 6
 
+RF24 Radio (7, 8);
+
 OneWire oneWire_BUS1(ONE_WIRE_BUS_1);
 OneWire oneWire_BUS2(ONE_WIRE_BUS_2);
 OneWire oneWire_BUS3(ONE_WIRE_BUS_3);
@@ -36,8 +44,13 @@ DallasTemperature sensor_1(&oneWire_BUS1);
 DallasTemperature sensor_2(&oneWire_BUS2);
 DallasTemperature sensor_3(&oneWire_BUS3);
 
-const byte led_indication = 7;
-const byte tpl110_reset_pin = 8;
+const byte address_tr[6] = "00001";
+const int buf_size = 5;
+int buf[buf_size];
+const int index_device = 1; //index of device for remote comunication
+
+const byte led_indication = 2;
+const byte tpl110_reset_pin = 3;
 const byte cs_pin = 10;
 const byte voltage_battery_pin = A0;
 
@@ -60,6 +73,7 @@ String file_name = "DATA.txt";
 
 void setup() {
   serial_initial();
+  nrf24l01_initial();
   analogReference(DEFAULT);
   pins_initial();
   sensors_initial();
@@ -74,6 +88,7 @@ void loop() {
     measure_flag = 0;
     measure_temperatures();
     voltage_measure();
+    remote_transmit_data();
     write_to_sd();
     serial_output();
     tpl_110_reset();
