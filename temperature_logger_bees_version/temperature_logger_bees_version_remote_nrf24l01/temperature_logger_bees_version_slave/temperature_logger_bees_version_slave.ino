@@ -1,6 +1,6 @@
 //####################################################
 //#   temperature_logger_bees_versionremote_nrf24l01_slave
-//#   Copyright (c) 2023 Tomas Picha
+//#   Copyright (c) 2024 Tomas Picha
 //#   programmed by: Tomas Picha
 //####################################################
 
