@@ -75,6 +75,7 @@ void loop() {
   if (measure_flag == 1) {
     measure_flag = 0;
     voltage_measure();
+    remote_recieve_data();
     remote_transmit_data();
     serial_output();
     write_to_sd();

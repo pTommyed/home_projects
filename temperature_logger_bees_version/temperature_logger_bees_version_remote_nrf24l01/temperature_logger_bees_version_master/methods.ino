@@ -65,7 +65,6 @@ void remote_recieve_data()
       }
       
       log_data [buf_re[0]][5]=1;
-      log_data [buf_re[0]][6]=1;
     }
     
     buf_re_clear();
@@ -175,14 +174,12 @@ void serial_output() {
   String message = "";
   float temp = 0.0;
 
-  Serial.println("-----------------------------");
-
-  message ="0: "+ String(voltage_battery) + " V"; 
+  message ="module 0: "+ String(voltage_battery) + " V"; 
   Serial.println(message);
 
   for (int i=1;i<log_size;i++){
     if ((log_data[i][0]!=200) && (log_data[i][5]==1)){
-      message = String(log_data[i][0]) + ": ";
+      message = "module " + String(log_data[i][0]) + ": ";
       Serial.print(message);
       for (int y=1;y<4;y++){
         temp = log_data[i][y] / 100;
@@ -193,13 +190,11 @@ void serial_output() {
           Serial.print(message);
           }
         temp = log_data[i][4] / 100;
-        message = String(temp) + " °C";
+        message = String(temp) + " V";
         Serial.println(message);
       }
     }
   }
-
-  Serial.println("-----------------------------"); 
 
   delay(250);      
 }
