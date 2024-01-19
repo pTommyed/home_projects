@@ -1,6 +1,6 @@
 //####################################################
 //#   temperature_logger_bees_version_remote_nrf24l01_master
-//#   Copyright (c) 2023 Tomas Picha
+//#   Copyright (c) 2024 Tomas Picha
 //#   programmed by: Tomas Picha
 //####################################################
 
@@ -10,7 +10,7 @@
 //               -   remote version
 //               -   master module
 
-// HW: Aruino nano, temperatrue sensor DS18B20, micros SD card module, nrf24l01
+// HW: Aruino nano, micros SD card module, nrf24l01
 
 /*----------------------- DEPENDENCES ----------------------------------*/
 #include <avr/sleep.h>      // library for sleep
