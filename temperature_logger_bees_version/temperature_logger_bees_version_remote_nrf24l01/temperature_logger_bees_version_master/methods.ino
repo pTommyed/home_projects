@@ -13,52 +13,91 @@ void nrf24l01_initial() {
   Radio.begin();
   //Radio.setAddressWidth(5);
   Radio.openWritingPipe(address_tr);
+  Radio.openReadingPipe(1, address_re);
   Radio.setChannel(115);  //115 band above WIFI signals
   Radio.setPALevel(RF24_PA_MAX); //MIN power low rage
   Radio.setDataRate(RF24_1MBPS) ;  //Minimum speed
   //Serial.println("Receive Setup Initialized");
   //Radio.printDetails();
-  Radio.stopListening(); //Stop Receiving and start transminitng
 
-  buf_clear();
+  buf_tr_clear();
+  buf_re_clear();
+
+  Radio.startListening();
 }
 
-/*----------------------transmit_bufer_clean------------------------------------*/
-void buf_clear() {
+/*----------------------transmit_bufer_tr_clean------------------------------------*/
+void buf_tr_clear() {
  for (int i=0;i<5;i++){
-    buf[i] = 100;
+    buf_tr[i] = 100;
+  }
+}
+
+/*----------------------transmit_bufer_re_clean------------------------------------*/
+void buf_re_clear() {
+ for (int i=0;i<5;i++){
+    buf_re[i] = 100;
+  }
+}
+
+/*----------------------log_data_init------------------------------------*/
+void log_data_init() {
+ for (int i=0;i<log_size;i++){
+    for (int y=0;y<data_size;y++){
+      log_data [i] [y] = 200;
+    }
+  }
+}
+
+/*----------------------remote_recieve_data------------------------------------*/
+
+void remote_recieve_data()
+{
+  uint8_t bytes;
+
+  if (Radio.available()){
+    while (Radio.available()){ 
+      bytes = Radio.getPayloadSize();
+      Radio.read(&buf_re, sizeof(buf_re));
+
+      for (int i =0; i<5;i++){
+        log_data [buf_re[0]][i] = buf_re[i];
+      }
+      
+      log_data [buf_re[0]][5]=1;
+      log_data [buf_re[0]][6]=1;
+    }
+    
+    buf_re_clear();
   }
 }
 
 /*----------------------remote_transmit_data------------------------------------*/
 void remote_transmit_data(){
-  transmit_buf_create();
+  delay(5);
+  Radio.stopListening(); //Stop Receiving and start transminitng
+  
+  buf_tr[0] = log_data[0][0];
+  buf_tr[1] = log_data[0][1];
 
   Radio.openWritingPipe(address_tr);//Sends data on this 40-bit address 
-  Radio.write(&buf, sizeof(buf));
-  //Serial.print("WriteData");
-  //Serial.print(".........");
+  Radio.write(&buf_tr, sizeof(buf_tr));
+  delay(5);
+  buf_tr_clear();
 
-  buf_clear();
-}
-
-/*----------------------transmit_buf_create------------------------------------*/
-void transmit_buf_create(){
-  int y = 0;
-  int temporary = 0;
-
-  buf[0] = index_device;
-
-  for(int i=0;i<3;i++){
-    y = y+1;
-    if (temp_control[i] == 1) {
-      temporary = temperature[i] * 100;
-      buf[y] = temporary;
+  for (int i=1;i<log_size;i++){
+    if ((log_data[i][0]!=200) && (log_data[i][5]==1)){
+      for (int y=0;y<5;y++){
+        buf_tr[y] = log_data[i][y];
+      }
+      Radio.openWritingPipe(address_tr);//Sends data on this 40-bit address 
+      Radio.write(&buf_tr, sizeof(buf_tr));
+      delay(5);
+      buf_tr_clear();
     }
   }
 
-  temporary = voltage_battery * 100;
-  buf[4] = temporary;
+  Radio.startListening();
 }
 
 /*----------------------pins-initialization------------------------------------*/
@@ -107,16 +146,9 @@ void sd_card_initial() {
           digitalWrite(led_indication, LOW);
           delay(500);
         }
+        
+        soubor.println("master module");
 
-        for(int i=0;i<3;i++){
-          int number = i + 1;
-          if (temp_control[i] == 1) {
-            message = "temp_" + String(number) + ": init OK;" ;
-            } else {
-                message = "temp_" + String(number) + ": no conected!;" ;
-              }
-            soubor.println(message);
-            }
         soubor.println("-----------------------------");
         soubor.println("-----------------------------");
         soubor.close();
@@ -132,15 +164,7 @@ void serial_initial_output() {
   Serial.println("-----------------------------");
   Serial.println("-----------------------------");
 
-  for(int i=0;i<3;i++) {
-    int number = i + 1;
-    if (temp_control[i] == 1) {
-      message = "temp_" + String(number) + ": init OK" ;
-    } else {
-        message = "temp_" + String(number) + ": no conected!" ;
-      }
-    Serial.println(message);
-  }
+  Serial.println("master module");
 
   Serial.println("-----------------------------");
   Serial.println("-----------------------------");       
@@ -149,24 +173,32 @@ void serial_initial_output() {
 /*------------------------------ serial_output ------------------------------------*/
 void serial_output() {
   String message = "";
+  float temp = 0.0;
 
   Serial.println("-----------------------------");
 
-  for(int i=0;i<3;i++) {
-    if (temp_control[i] == 1) {
-      int number = i + 1;
-      message = "temp_" + String(number) + ": ";
-      if (temperature[i] == -127) {
-        message = message + "err";
-        Serial.println(message);
-      }else {
-        message = message + String(temperature[i]) + " °C" ;
+  message ="0: "+ String(voltage_battery) + " V"; 
+  Serial.println(message);
+
+  for (int i=1;i<log_size;i++){
+    if ((log_data[i][0]!=200) && (log_data[i][5]==1)){
+      message = String(log_data[i][0]) + ": ";
+      Serial.print(message);
+      for (int y=1;y<4;y++){
+        temp = log_data[i][y] / 100;
+        if (temp == -127) {
+          Serial.print("err ;");
+        } else {
+          message = String(temp) + " °C";
+          Serial.print(message);
+          }
+        temp = log_data[i][4] / 100;
+        message = String(temp) + " °C";
         Serial.println(message);
       }
     }
   }
-  message = "battery voltage: " + String(voltage_battery) + " V"; 
-  Serial.println(message);
+
   Serial.println("-----------------------------"); 
 
   delay(250);      
@@ -175,6 +207,7 @@ void serial_output() {
 /*------------------------ write_to_SD ---------------------------------------*/
 void write_to_sd() {
   String message = "";
+  float temp = 0.0;
   
   soubor = SD.open(file_name, FILE_WRITE); 
   while (!soubor){
@@ -185,61 +218,35 @@ void write_to_sd() {
     delay(500);
     }
 
-  for(int i=0;i<3;i++){
-    if (temp_control[i] == 1) {
-      if (temperature[i] == -127) {
-        soubor.print("err ;");
-      } else {
-        message = String(temperature[i]) + ";";
-        soubor.print(message);
-        }
-      }
-    }
-  message = String(voltage_battery) + ";"; 
+  message ="0;"+ String(voltage_battery) + ";"; 
   soubor.println(message);
+
+  for (int i=1;i<log_size;i++){
+    if ((log_data[i][0]!=200) && (log_data[i][5]==1)){
+      message = String(log_data[i][0]) + ";";
+      soubor.print(message);
+      for (int y=1;y<4;y++){
+        temp = log_data[i][y] / 100;
+        if (temp == -127) {
+          soubor.print("err;");
+        } else {
+          message = String(temp) + ";";
+          soubor.print(message);
+          }
+        temp = log_data[i][4] / 100;
+        message = String(temp) + ";";
+        soubor.println(message);
+      }
+      log_data [i] [5] = 200;
+    }
+  }
   soubor.close();
   delay(250);
 } 
 
-/*-----------------------Sensors-initialization--------------------------------*/
-void sensors_initial() {
-  float temp[3] = {100.0,100.0,100.0}; // temperature in°C
-  
-  sensor_1.begin(); // temperature 1 init
-  sensor_2.begin(); // temperature 2 init
-  sensor_3.begin(); // temperature 3 init
-
-  sensor_1.requestTemperatures();
-  sensor_2.requestTemperatures();
-  sensor_3.requestTemperatures();
-
-  temp[0]=sensor_1.getTempCByIndex(0);
-  temp[1]=sensor_2.getTempCByIndex(0);
-  temp[2]=sensor_3.getTempCByIndex(0);
-
-  for(int i=0;i<3;i++){
-    if (temp[i] != -127) {
-      temp_control[i] = 1;
-    }
-  }
-}
-
-/*-----------------------Sensors-requesting-temperature--------------------------------*/
-void sensors_request() {
-  sensor_1.requestTemperatures();
-  sensor_2.requestTemperatures();
-  sensor_3.requestTemperatures();
-}
-
-/*-----------------------Sensors-get-temperature--------------------------------*/
-void sensors_get_temp() {
-  temperature[0]=sensor_1.getTempCByIndex(0);
-  temperature[1]=sensor_2.getTempCByIndex(0);
-  temperature[2]=sensor_3.getTempCByIndex(0);
-}
-
 /*----------------------voltage_measure------------------------------------*/
 void voltage_measure() {
+  int temp = 0;
   int voltage_temp = 0;
 
   for (int temp =0;temp < measure_count; temp++) {
@@ -250,6 +257,10 @@ void voltage_measure() {
   voltage_divided = voltage_divided * (5.0 / 1023.0);
 
   voltage_battery = voltage_divided / (res_2 / res);
+  
+  temp = voltage_battery * 100;
+  log_data[0][0] = index_device;
+  log_data[0][1] = temp;
 }
 
 /*------------------------sleep_mode_to_8_sec_init -----------------------------------------*/
@@ -261,16 +272,6 @@ void sleep_mode_8s_init () {
   WDTCSR |= (1 << WDCE) | (1 << WDE);              // eneable watch dog setting
   WDTCSR = (1 << WDP0) | (1 << WDP3) ;             // set watch dog to 8 s
   WDTCSR |= (1 << WDIE);                           // enale interrupt mode
-}
-
-/*-----------------------tpl_110_reset--------------------------------*/
-void tpl_110_reset() {
-  for (int i=0; i<2; i++) {
-    digitalWrite(tpl110_reset_pin, HIGH);
-    delay(100);
-    digitalWrite(tpl110_reset_pin, LOW);
-    delay(100);
-  } 
 }
 
 /*------------------------run _leep_mode_to_8_sec -----------------------------------------*/
@@ -285,10 +286,4 @@ void run_sleep_8s () {
 
 ISR( WDT_vect ) {
   measure_flag = 1;
-}
-
-/*-------------------------- measure_temperatures  -------------------------*/
-void measure_temperatures() {
-  sensors_request();
-  sensors_get_temp();
 }
