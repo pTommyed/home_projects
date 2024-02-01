@@ -27,7 +27,7 @@ void nrf24l01_initial() {
 /*----------------------transmit_bufer_re_clean------------------------------------*/
 void buf_re_clear() {
  for (int i=0;i<5;i++){
-    buf_re[i] = 100;
+    buf_re[i] = 30000;
   }
 }
 
@@ -86,18 +86,24 @@ void serial_output() {
       message = "module " + String(log_data[i][0]) + ": ";
       Serial.print(message);
       for (int y=1;y<4;y++){
-        temp = log_data[i][y] / 100;
+        temp = log_data[i][y] / 100.00;
         if (temp == -127) {
-          Serial.print("err ;");
-        } else {
-          message = String(temp) + " °C";
-          Serial.print(message);
-          }
-        temp = log_data[i][4] / 100;
-        message = String(temp) + " V";
-        Serial.println(message);
+          Serial.print("err; ");
+        } else if (temp == 300) {
+            Serial.print("NAN; ");
+          } else {
+              message = String(temp) + " °C ";
+              Serial.print(message);
+            }
       }
-      log_data [i] [5] = 200;
+      temp = log_data[i][4] / 100.00;
+      if (temp == 300) {
+        Serial.println("NAN; ");
+      } else {
+          message = String(temp) + " V";
+          Serial.println(message);
+        }
+      log_data [i] [5] = 200;  
     }
   }
 

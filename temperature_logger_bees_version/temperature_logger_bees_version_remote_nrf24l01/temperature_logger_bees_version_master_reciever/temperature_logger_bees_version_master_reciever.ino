@@ -27,7 +27,7 @@ const byte address_re[6] = "00002";
 const int buf_size = 5;
 int buf_re[buf_size];
 
-const int log_size = 50;
+const int log_size = 20; //max 30 modules
 const int data_size = 6;
 int log_data [log_size] [data_size];
 

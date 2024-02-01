@@ -19,24 +19,23 @@ void nrf24l01_initial() {
   Radio.setDataRate(RF24_1MBPS) ;  //Minimum speed
   //Serial.println("Receive Setup Initialized");
   //Radio.printDetails();
+  Radio.stopListening(); //Stop Receiving and start transminitng
 
   buf_tr_clear();
   buf_re_clear();
-
-  Radio.startListening();
 }
 
 /*----------------------transmit_bufer_tr_clean------------------------------------*/
 void buf_tr_clear() {
  for (int i=0;i<5;i++){
-    buf_tr[i] = 100;
+    buf_tr[i] = 30000;
   }
 }
 
 /*----------------------transmit_bufer_re_clean------------------------------------*/
 void buf_re_clear() {
  for (int i=0;i<5;i++){
-    buf_re[i] = 100;
+    buf_re[i] = 30000;
   }
 }
 
@@ -122,7 +121,8 @@ void bootup_led_indication() {
 
 /*------------------------------ sd_card_initial ------------------------------------*/
 void sd_card_initial() {
-  String message = "";
+
+  Radio.stopListening(); //Stop Receiving and start transminitng
 
   while (!SD.begin(cs_pin)) { 
     Serial.println("SD_card_no_detected!");
@@ -151,14 +151,15 @@ void sd_card_initial() {
         soubor.println("-----------------------------");
         soubor.println("-----------------------------");
         soubor.close();
-        } 
+      } 
 
-  delay(250);            
+  delay(250);
+
+  Radio.startListening();            
 }
 
 /*------------------------------ serial_initial_output ------------------------------------*/
 void serial_initial_output() {
-  String message = "";
 
   Serial.println("-----------------------------");
   Serial.println("-----------------------------");
@@ -182,17 +183,19 @@ void serial_output() {
       message = "module " + String(log_data[i][0]) + ": ";
       Serial.print(message);
       for (int y=1;y<4;y++){
-        temp = log_data[i][y] / 100;
+        temp = log_data[i][y] / 100.00;
         if (temp == -127) {
-          Serial.print("err ;");
-        } else {
-          message = String(temp) + " °C";
-          Serial.print(message);
-          }
-        temp = log_data[i][4] / 100;
-        message = String(temp) + " V";
-        Serial.println(message);
+          Serial.print("err; ");
+        } else if (temp == 300) {
+            Serial.print("NAN; ");
+          } else {
+             message = String(temp) + " °C ";
+             Serial.print(message);
+             }
       }
+      temp = log_data[i][4] / 100.00;
+      message = String(temp) + " V";
+      Serial.println(message);
     }
   }
 
@@ -203,6 +206,8 @@ void serial_output() {
 void write_to_sd() {
   String message = "";
   float temp = 0.0;
+
+  Radio.stopListening(); //Stop Receiving and start transminitng
   
   soubor = SD.open(file_name, FILE_WRITE); 
   while (!soubor){
@@ -221,22 +226,26 @@ void write_to_sd() {
       message = String(log_data[i][0]) + ";";
       soubor.print(message);
       for (int y=1;y<4;y++){
-        temp = log_data[i][y] / 100;
+        temp = log_data[i][y] / 100.00;
         if (temp == -127) {
           soubor.print("err;");
-        } else {
-          message = String(temp) + ";";
-          soubor.print(message);
-          }
-        temp = log_data[i][4] / 100;
-        message = String(temp) + ";";
-        soubor.println(message);
+        } else if (temp == 300) {
+           soubor.print("NAN;");
+          } else {
+              message = String(temp) + ";";
+              soubor.print(message);
+            }
       }
+      temp = log_data[i][4] / 100.00;
+      message = String(temp) + ";";
+      soubor.println(message);
       log_data [i] [5] = 200;
     }
   }
   soubor.close();
   delay(250);
+
+  Radio.startListening();
 } 
 
 /*----------------------voltage_measure------------------------------------*/

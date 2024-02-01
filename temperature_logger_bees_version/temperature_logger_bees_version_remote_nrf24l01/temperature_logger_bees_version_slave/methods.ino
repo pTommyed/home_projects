@@ -26,7 +26,7 @@ void nrf24l01_initial() {
 /*----------------------transmit_bufer_clean------------------------------------*/
 void buf_clear() {
  for (int i=0;i<5;i++){
-    buf[i] = 100;
+    buf[i] = 30000;
   }
 }
 

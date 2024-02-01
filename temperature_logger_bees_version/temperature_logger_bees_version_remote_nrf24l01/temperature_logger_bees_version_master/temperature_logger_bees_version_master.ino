@@ -50,7 +50,7 @@ static float res_1 = 330000.0; // resistance of res_1 resistor
 static float res_2 = 390000.0; // resistance of res_2 resistor
 float res = res_1 + res_2; 
 
-const int log_size = 50;
+const int log_size = 20; //max 30 modules
 const int data_size = 6;
 int log_data [log_size] [data_size];
 
