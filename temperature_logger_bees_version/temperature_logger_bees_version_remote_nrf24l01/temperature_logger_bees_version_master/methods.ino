@@ -84,7 +84,7 @@ void remote_transmit_data(){
   buf_tr_clear();
 
   for (int i=1;i<log_size;i++){
-    if ((log_data[i][0]!=200) && (log_data[i][5]==1)){
+    if (log_data[i][0]!=200) {
       for (int y=0;y<5;y++){
         buf_tr[y] = log_data[i][y];
       }
@@ -179,7 +179,7 @@ void serial_output() {
   Serial.println(message);
 
   for (int i=1;i<log_size;i++){
-    if ((log_data[i][0]!=200) && (log_data[i][5]==1)){
+    if (log_data[i][0]!=200) {
       message = "module " + String(log_data[i][0]) + ": ";
       Serial.print(message);
       for (int y=1;y<4;y++){

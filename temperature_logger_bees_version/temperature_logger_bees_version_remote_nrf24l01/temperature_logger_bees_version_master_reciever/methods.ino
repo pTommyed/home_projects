@@ -103,7 +103,7 @@ void serial_output() {
           message = String(temp) + " V";
           Serial.println(message);
         }
-      //log_data [i] [5] = 200;  // pokud se zruší komentář tak se vždy vypíší jen jednou nová data a ne opakovaně
+      //log_data [i] [5] = 200;  // repeated print outs - off
     }
   }
 
