@@ -46,17 +46,15 @@ const float hysterezia = 0.5;
 const float air_temp_max = air_temp_set + hysterezia;
 const float air_temp_min = air_temp_set - hysterezia;
 
-const float humidity_max = 90.0;
+const float humidity_max = 80.0;
 const float humidity_min = 60.0;
 
-const int watter_level_max = 215;
-const int watter_level_min = 290;
-const float one_percent = (watter_level_min - watter_level_max) / 100.0;
+const int watter_level_full = 100; // 0-100 - full watter level
+const int watter_level_none = 400; // 400-515 - none watter
 
 float air_temp = 0.0; // in °C
 float humidity = 1000.0; // in %
-int watter_level = 1000;
-int watter_level_percent = 0; // watter level in percent
+int watter_level = 2000;
 
 bool heater_on_flag = 0;
 bool humidity_on_flag = 0;

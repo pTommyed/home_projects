@@ -134,7 +134,7 @@ void sd_card_initial() {
           delay(500);
         }
 
-        soubor.println("air_temperatur[°C];  humidity[%];  watter_level[-];  watter_level[%];  heater[-];  humidifier[-];");    
+        soubor.println("air_temperatur[°C];  humidity[%];  watter_level[-];  heater[-];  humidifier[-];");    
         soubor.println("-----------------------------");
         soubor.println("-----------------------------");
         soubor.close();
@@ -153,19 +153,6 @@ void watter_level_measure() {
 
   watter_level = voltage_temp / measure_count;
   //Serial.println(watter_level);
-  watter_level_convert_percent();
-}
-
-/*----------------------watter_level_percent------------------------------------*/
-void watter_level_convert_percent() {
-  
-  if (watter_level <= watter_level_max){
-    watter_level_percent = 100;  
-  } else if (watter_level  >= watter_level_min) {
-      watter_level_percent = 0;
-    } else {
-        watter_level_percent = (watter_level_min - watter_level) / one_percent;
-      }
 }
 
 /*-----------------------reading-data-from-DHT22--------------------------------*/
@@ -232,7 +219,7 @@ void write_to_sd() {
   }
   
 
-  message = String(watter_level) + ";" + String(watter_level_percent) + ";" + String(heater_on_flag) + ";" + String(humidity_on_flag) + ";"; 
+  message = String(watter_level) + ";" + String(heater_on_flag) + ";" + String(humidity_on_flag) + ";"; 
   soubor.println(message);
   soubor.close();
   delay(250);
@@ -259,7 +246,7 @@ void serial_output() {
   }
   
 
-  message = String(watter_level) + ";" + String(watter_level_percent) + ";" + String(heater_on_flag) + ";" + String(humidity_on_flag) + ";"; 
+  message = String(watter_level) + ";" + String(heater_on_flag) + ";" + String(humidity_on_flag) + ";"; 
   Serial.println(message);
   Serial.println("-----------------------------"); 
 
@@ -290,11 +277,11 @@ void control_heater_output() {
 void control_humidity_output() {
 
   if (humidity_error_flag == 0) {
-    if ((humidity < humidity_min ) && (watter_level > watter_level_min) && (humidity_on_flag == 0)) {
+    if ((humidity < humidity_min ) && (watter_level < watter_level_full) && (humidity_on_flag == 0)) {
       humidity_on_flag = 1;
       digitalWrite(relay_humidity, HIGH);
       delay(100);
-    } else if (((humidity > humidity_max) && (humidity_on_flag == 1)) || (watter_level <= watter_level_min)) {
+    } else if (((humidity > humidity_max) && (humidity_on_flag == 1)) || (watter_level > watter_level_none)) {
         humidity_on_flag = 0;
         digitalWrite(relay_humidity, LOW);
         delay(100);
@@ -348,10 +335,13 @@ void lcd_print() {
 
   lcd.setCursor(0,2); 
   lcd.print("Wat_lev:"); 
-  lcd.setCursor(9,2); 
-  lcd.print(watter_level_percent);
-  lcd.setCursor(12,2); 
-  lcd.print(" %");  
+  lcd.setCursor(9,2);
+  if (watter_level < watter_level_full) {
+    lcd.print("FULL");
+  } else if (watter_level > watter_level_none) {
+      lcd.print("NONE");
+  }
+  
 }
 
 /*-------------------------- led_measure_indicator_set -------------------------*/
